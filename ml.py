@@ -20,7 +20,7 @@ except Exception as e:
     exit(1)
 
 # Step 2: Check if the required columns are present
-required_columns = ['Velocidade_km_h', 'vel.cal', 'Dif.Vel', 'cluster']
+required_columns = ['Velocidade_km_h', 'cluster']
 
 missing_columns = [col for col in required_columns if col not in excel_data.columns]
 if missing_columns:
@@ -36,7 +36,7 @@ label_encoder = LabelEncoder()
 y_encoded = label_encoder.fit_transform(y)
 
 # Step 4: Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.02, random_state=42)
 
 print(type(y_train[0]), type(y_test))
 # Step 5: Standardize the input features
@@ -46,23 +46,24 @@ X_test = scaler.transform(X_test)
 
 # Step 6: Build the neural network model
 model = Sequential()
-model.add(Dense(64, input_dim=X_train.shape[1], activation='relu'))
-model.add(Dense(32, activation='relu'))
-model.add(Dense(32, activation='relu'))
-model.add(Dense(32, activation='sigmoid'))
-model.add(Dense(32, activation='sigmoid'))
-model.add(Dense(1, activation='sigmoid'))  # Sigmoid activation for binary classification
+# Input layer
+model.add(Dense(16, input_dim=20, activation=’relu’))
+model.add(Dense(12, activation=’relu’))
+model.add(Dense(4, activation=’softmax’))
+# Output layer
+#model.add(Dense(1, activation='sigmoid'))  # Sigmoid activation for binary classification
+
 
 # Compile the model
-model.compile(loss='binary_crossentropy', optimizer = "adam", metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer = "adam", metrics=['accuracy'])
 
 # Step 7: Train the neural network
-model.fit(X_train, y_train, epochs=30, batch_size=50, verbose=3)
+model.fit(X_train, y_train, epochs=10, batch_size=10, verbose=3)
 print(model.summary())
 
 # Step 8: Evaluate the model on the test data
 accuracy = model.evaluate(X_test, y_test)[1]
 print(X_test)
 print(f"Accuracy: {accuracy * 100:.2f}%")
-
+model.save('mymodel.h5')
 # Now you have a trained neural network that can classify clusters based on the specified columns in the Excel file.
